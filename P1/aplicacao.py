@@ -56,6 +56,7 @@ def main():
         #nome de txBuffer. Esla sempre irá armazenar os dados a serem enviados.
         
         txBuffer = img_to_bytes("img.jpeg")
+        print(txBuffer)
     
         #faça aqui uma conferência do tamanho do seu txBuffer, ou seja, quantos bytes serão enviados.
        
