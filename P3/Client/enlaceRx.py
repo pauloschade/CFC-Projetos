@@ -68,8 +68,18 @@ class RX(object):
         return(b)
 
     def getNData(self, size):
+        counter = 0
         while(self.getBufferLen() < size):
-            time.sleep(0.05)                 
+            counter += 1
+            time.sleep(0.05)
+            if counter >= 100:
+                loop = input("Servidor inativo. Tentar novamente? S/N")
+                counter = 0
+                if loop == "N":
+                    self.clearBuffer()
+                    break
+                else:
+                    return True
         return(self.getBuffer(size))
 
 
