@@ -6,7 +6,7 @@ def make_head(lista):
     return head
 
 def make_package(tipo, n):
-    lista_head = [tipo, 10, 11, 0, 0, n, 0,0,0,0]
+    lista_head = [tipo, 10, 11, 0, 0, 0, n,0,0,0]
     head = make_head(lista_head)
     package = head + b'' + b'\xFF\xAA\xFF\xAA'
     return package

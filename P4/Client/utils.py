@@ -35,7 +35,7 @@ def make_packages(buffer, tipo):
         heads.append(make_head(lista_head))
     packages = []
     for i in range(total_size):
-        package = heads[i] + payloads[i] + b'\xFF\xAA\xFF\xAA'
+        package = heads[i] + payloads[i]
         packages.append(package)
     return packages
 

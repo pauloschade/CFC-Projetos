@@ -10,6 +10,7 @@ class Client():
         self.index = 0
         self.done = False
         self.type = 0
+        self.error = True
 
     def set_start(self):
         self.start_package =  utils.make_start_package(self.total_packages)
@@ -23,7 +24,12 @@ class Client():
         self.com1.sendData(self.start_package)
 
     def send_packages(self):
-        self.com1.sendData(self.packages[self.index]) 
+        if self.error and self.index == 7:
+            self.com1.sendData(self.packages[self.index] +  b'\xFF\xAA\xFF\xAB') 
+            self.error = False
+        else:
+            self.packages[self.index] +=  b'\xFF\xAA\xFF\xAA'
+            self.com1.sendData(self.packages[self.index])
         self.index+=1
         if self.index == self.total_packages:
             self.done = True
@@ -40,8 +46,10 @@ class Client():
             if i == 1:
                 assert rx_int == self.id, "Not for me"
 
-            if i == 6 and self.type == 5:
-                self.index = rx_int
+            if i == 6 and self.type == 6:
+                print("ERRO!!!!!!")
+                
+                self.index = rx_int - 1
 
     def read_eoc(self):
         rx, n = self.com1.getData(4)

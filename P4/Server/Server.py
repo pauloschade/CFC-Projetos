@@ -12,12 +12,13 @@ class Server():
         self.package_number = 0
         self.done = False
         self.index = 0
+        self.rx = b''
 
     def check_number(self, n):
         assert self.package_number == n , "Wrong Package"
 
     def set_package(self, tipo):
-        self.package =  utils.make_package(tipo, self.package_number)
+        self.package =  utils.make_package(tipo, self.index)
 
     def send_package(self, tipo):
         self.set_package(tipo)
@@ -51,21 +52,22 @@ class Server():
         #assert rx == b'\xFF\xAA\xFF\xAA', "EOC not valid"
         if rx != b'\xFF\xAA\xFF\xAA':
             print("EOC not valid")
-            self.send_package(5)
+            self.send_package(6)
             
         elif self.type == 1:
             self.send_package(2)
+            self.index += 1
         else:
             self.send_package(4)
+            self.index += 1
+            self.rx_buffer += self.rx
 
 
     def read_package(self):
         self.read_head()
         assert self.ocioso, "not ready to receive"
         self.check_number(self.index)
-        self.index += 1
-        rx, n = self.com1.getData(self.payload_size)
-        self.rx_buffer += rx
+        self.rx, n = self.com1.getData(self.payload_size)
         self.read_eoc()
         self.com1.rx.clearBuffer()
         if self.index == self.rx_size + 1:

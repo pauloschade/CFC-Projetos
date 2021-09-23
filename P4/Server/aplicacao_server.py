@@ -38,10 +38,7 @@ def main():
     try:
         com1 = enlace(serialName)
         com1.enable()
-        
         newServer = Server(com1)
-
-
         newServer.read_package()
         print("Message received")
         time.sleep(1.5)

@@ -71,7 +71,7 @@ def main():
         print("starting transmission...")
 
         while not newClient.done:
-            print(f"sending {newClient.index}")
+            print(f"sending {newClient.index + 1}")
             newClient.send_packages()
             newClient.receive_package()
 
