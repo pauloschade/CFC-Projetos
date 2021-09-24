@@ -23,6 +23,7 @@ class TX(object):
         self.empty       = True
         self.threadMutex = False
         self.threadStop  = False
+        self.timer = 0
 
 
     def thread(self):

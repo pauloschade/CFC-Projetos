@@ -22,6 +22,8 @@ class RX(object):
         self.threadStop  = False
         self.threadMutex = True
         self.READLEN     = 1024
+        self.timer1 = 0
+        self.ready = True
 
     def thread(self): 
         while not self.threadStop:
@@ -53,7 +55,7 @@ class RX(object):
     def getBufferLen(self):
         return(len(self.buffer))
 
-    def getAllBuffer(self, len):
+    def getAllBuffer(self):
         self.threadPause()
         b = self.buffer[:]
         self.clearBuffer()
@@ -68,18 +70,13 @@ class RX(object):
         return(b)
 
     def getNData(self, size):
-        counter = 0
         while(self.getBufferLen() < size):
-            # counter += 1
+            if self.timer1 > 4.9:
+                self.timer1 = 0
+                return None
             time.sleep(0.05)
-            # if counter >= 100:
-            #     loop = input("Servidor inativo. Tentar novamente? S/N")
-            #     counter = 0
-            #     if loop == "N":
-            #         self.clearBuffer()
-            #         break
-            #     else:
-            #         return True
+            self.timer1 += 0.05
+        self.timer1 = 0
         return(self.getBuffer(size))
 
 

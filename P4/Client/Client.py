@@ -1,4 +1,5 @@
 import utils
+import time
 class Client():
     def __init__(self, buffer, com1):
         self.id = 10
@@ -10,7 +11,18 @@ class Client():
         self.index = 0
         self.done = False
         self.type = 0
-        self.error = True
+        self.error = False
+        self.timer2 = 0
+
+    def count_timer(self):
+        pass
+
+    def set_timeout(self):
+        self.com1.rx.clearBuffer()
+        print(f"resending package{self.index}")
+        time.sleep(1)
+        self.index -= 1
+        self.send_packages()
 
     def set_start(self):
         self.start_package =  utils.make_start_package(self.total_packages)
@@ -22,6 +34,7 @@ class Client():
 
     def send_start_package(self):
         self.com1.sendData(self.start_package)
+        time.sleep(1)
 
     def send_packages(self):
         if self.error and self.index == 7:
@@ -38,28 +51,36 @@ class Client():
     def read_head(self):
         for i in range(10):
             rx, n = self.com1.getData(1)
-            rx_int = int.from_bytes(rx, byteorder='big')
+            if rx == None:
+                self.set_timeout()
 
-            if i == 0:
-                self.type = rx_int
+            else:
 
-            if i == 1:
-                assert rx_int == self.id, "Not for me"
+                rx_int = int.from_bytes(rx, byteorder='big')
 
-            if i == 6 and self.type == 6:
-                print("ERRO!!!!!!")
-                
-                self.index = rx_int - 1
+                if i == 0:
+                    self.type = rx_int
+
+                if i == 1:
+                    assert rx_int == self.id, "Not for me"
+
+                if i == 6 and self.type == 6:
+                    print("ERRO!!!!!!")
+                    
+                    self.index = rx_int - 1
 
     def read_eoc(self):
         rx, n = self.com1.getData(4)
-        assert rx == b'\xFF\xAA\xFF\xAA', "EOC not valid"
+        if rx != b'\xFF\xAA\xFF\xAA':
+            self.com1.rx.clearBuffer()
+            print("EOC not valid")
+
     
     def receive_package(self):
         self.read_head()
         self.read_eoc()
         self.com1.rx.clearBuffer()
-        
+
     
 
 

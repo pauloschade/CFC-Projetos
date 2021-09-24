@@ -22,6 +22,7 @@ class RX(object):
         self.threadStop  = False
         self.threadMutex = True
         self.READLEN     = 1024
+        self.timer1 = 0
 
     def thread(self): 
         while not self.threadStop:
@@ -68,9 +69,13 @@ class RX(object):
         return(b)
 
     def getNData(self, size):
-        counter = 0
         while(self.getBufferLen() < size):
-            time.sleep(0.05)    
+            if self.timer1 > 1.9:
+                self.timer1 = 0
+                return None
+            time.sleep(0.05)
+            self.timer1 += 0.05
+        self.timer1 = 0
         return(self.getBuffer(size))
 
 
