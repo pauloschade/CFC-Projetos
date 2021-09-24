@@ -20,7 +20,7 @@ class Client():
     def set_timeout(self):
         self.com1.rx.clearBuffer()
         print(f"resending package{self.index}")
-        time.sleep(1)
+        time.sleep(2)
         self.index -= 1
         self.send_packages()
 
@@ -62,7 +62,8 @@ class Client():
                     self.type = rx_int
 
                 if i == 1:
-                    assert rx_int == self.id, "Not for me"
+                    print(rx_int)
+                    #assert rx_int == self.id, "Not for me"
 
                 if i == 6 and self.type == 6:
                     print("ERRO!!!!!!")

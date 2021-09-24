@@ -21,6 +21,7 @@ class Server():
 
     def check_number(self, n):
         if self.package_number != n:
+            print(n)
             print("Wrong Package")
             self.send_error()
 
@@ -29,7 +30,7 @@ class Server():
         self.com1.rx.clearBuffer()
         print("server None")
         print(f"waiting for package{self.index}")
-        time.sleep(1)
+        time.sleep(3)
 
 
 
