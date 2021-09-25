@@ -14,7 +14,7 @@ class Client():
         self.error = False
         self.timer2 = 0
 
-    def count_timer(self):
+    def count_timer2(self):
         pass
 
     def set_timeout(self):
@@ -53,7 +53,7 @@ class Client():
             rx, n = self.com1.getData(1)
             if rx == None:
                 self.set_timeout()
-
+                break
             else:
 
                 rx_int = int.from_bytes(rx, byteorder='big')
@@ -62,11 +62,10 @@ class Client():
                     self.type = rx_int
 
                 if i == 1:
-                    print(rx_int)
-                    #assert rx_int == self.id, "Not for me"
+                    assert rx_int == self.id, "Not for me"
 
                 if i == 6 and self.type == 6:
-                    print("ERRO!!!!!!")
+                    print("Resend package, received error type 6")
                     
                     self.index = rx_int - 1
 
@@ -75,6 +74,8 @@ class Client():
         if rx != b'\xFF\xAA\xFF\xAA':
             self.com1.rx.clearBuffer()
             print("EOC not valid")
+            time.sleep(1)
+
 
     
     def receive_package(self):

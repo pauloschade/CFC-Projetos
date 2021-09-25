@@ -21,9 +21,10 @@ class Server():
 
     def check_number(self, n):
         if self.package_number != n:
-            print(n)
             print("Wrong Package")
             self.send_error()
+            time.sleep(1)
+
 
     def set_timeout(self):
         self.timeout = True
@@ -78,6 +79,7 @@ class Server():
         rx, n = self.com1.getData(4)
         if rx != b'\xFF\xAA\xFF\xAA':
             print("EOC not valid")
+            time.sleep(1)
             self.com1.rx.clearBuffer()
             self.send_error()
             
