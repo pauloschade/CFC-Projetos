@@ -10,12 +10,18 @@ class Client():
         self.com1 = com1
         self.index = 0
         self.done = False
+
+        self.sending_type = 1
         self.type = 0
         self.error = False
         self.timer2 = 0
+        self.timeout = False
 
     def count_timer2(self):
-        pass
+        if self.timer2 > 3:
+            print("Server is inactive, ending com")
+            self.done = True
+        self.timer2 += 1
 
     def set_timeout(self):
         self.com1.rx.clearBuffer()
@@ -25,11 +31,13 @@ class Client():
         self.send_packages()
 
     def set_start(self):
-        self.start_package =  utils.make_start_package(self.total_packages)
+        self.start_package =  utils.make_start_package(self.total_packages, self.sending_type)
 
     def setup_packages(self):
-        self.packages = utils.make_packages(self.buffer, 3)
+        self.sending_type = 3
+        self.packages = utils.make_packages(self.buffer, self.sending_type)
         self.total_packages = len(self.packages)
+        self.sending_type = 1
         self.set_start()
 
     def send_start_package(self):
@@ -38,7 +46,7 @@ class Client():
 
     def send_packages(self):
         if self.error and self.index == 7:
-            self.com1.sendData(self.packages[self.index] +  b'\xFF\xAA\xFF\xAB') 
+            self.com1.sendData(self.packages[self.index + 4] +  b'\xFF\xAA\xFF\xAB') 
             self.error = False
         else:
             self.packages[self.index] +=  b'\xFF\xAA\xFF\xAA'
@@ -52,9 +60,12 @@ class Client():
         for i in range(10):
             rx, n = self.com1.getData(1)
             if rx == None:
+                self.timeout = True
+                self.count_timer2()
                 self.set_timeout()
                 break
             else:
+                self.timeout = False
 
                 rx_int = int.from_bytes(rx, byteorder='big')
 
@@ -75,13 +86,17 @@ class Client():
             self.com1.rx.clearBuffer()
             print("EOC not valid")
             time.sleep(1)
+            self.index -= 1
 
 
     
     def receive_package(self):
         self.read_head()
-        self.read_eoc()
-        self.com1.rx.clearBuffer()
+        if not self.timeout:
+            self.read_eoc()
+            self.com1.rx.clearBuffer()
+        else:
+            pass
 
     
 
