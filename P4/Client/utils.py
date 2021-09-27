@@ -39,8 +39,8 @@ def make_packages(buffer, tipo):
         packages.append(package)
     return packages
 
-def make_start_package(size):
-    lista_head = [1, 10, 11, size, 0, 0, 0,0,0,0]
+def make_start_package(size, type_):
+    lista_head = [type_, 10, 11, size, 0, 0, 0,0,0,0]
     head = make_head(lista_head)
     package = head + b'' + b'\xFF\xAA\xFF\xAA'
     return package
