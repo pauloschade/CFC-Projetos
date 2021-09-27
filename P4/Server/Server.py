@@ -94,6 +94,7 @@ class Server():
 
     def read_package(self):
         self.read_head()
+        assert self.ocioso, "not ready to receive"
         if not self.timeout:
             self.check_number(self.index)
             self.rx, n = self.com1.getData(self.payload_size)
