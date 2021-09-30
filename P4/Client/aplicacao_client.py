@@ -73,6 +73,7 @@ def main():
         while not newClient.done:
             print(f"sending {newClient.index + 1}")
             newClient.send_packages()
+            time.sleep(0.1)
             newClient.receive_package()
 
         
