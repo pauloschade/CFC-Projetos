@@ -17,11 +17,15 @@ class Client():
         self.timer2 = 0
         self.timeout = False
         self.transmission = 1
+        self.handshake = True
 
     def count_timer2(self):
         if self.timer2 > 2:
             print("Server is inactive, ending com")
+            self.sending_type = 5
+            self.log("envio")
             self.done = True
+            self.handshake = False
         self.timer2 += 1
 
     def set_timeout(self):
@@ -62,12 +66,14 @@ class Client():
         for i in range(10):
             rx, n = self.com1.getData(1)
             if rx == None:
-                self.timeout = True
+                if not self.handshake:
+                    self.timeout = True
+                    self.set_timeout()
+                    self.transmission = 5
                 self.count_timer2()
-                self.set_timeout()
-                self.transmission = 5
                 break
             else:
+                self.handshake = False
                 self.timeout = False
 
                 rx_int = int.from_bytes(rx, byteorder='big')
@@ -92,6 +98,9 @@ class Client():
             self.com1.rx.clearBuffer()
             print("EOC not valid")
             time.sleep(0.05)
+        else:
+            self.sending_type = self.type
+            self.log("recebeu")
 
 
     
@@ -105,7 +114,6 @@ class Client():
                 self.index += 1
         else:
             pass
-        self.log("recebeu")
 
 
     def log(self, envio):
@@ -116,7 +124,7 @@ class Client():
             s = [time,envio, self.sending_type, len(self.packages[self.index]), self.index + 1, self.total_packages]
         else:
             s = [time,envio, self.sending_type, 14]
-        with open(f"Client{self.transmission}.txt", "a") as f:
+        with open(f"Client{5}.txt", "a") as f:
             for i in s:
                 f.write(str(i) + " / ")
             f.write("\n")

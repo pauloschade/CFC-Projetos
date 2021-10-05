@@ -64,11 +64,11 @@ def main():
         newClient.setup_packages()
         print("packages setup")
 
-
-        newClient.send_start_package()
-        print("Start Package sent")
-        newClient.receive_package()
-        print("starting transmission...")
+        while newClient.handshake:
+            newClient.send_start_package()
+            print("Start Package sent")
+            newClient.receive_package()
+            print("starting transmission...")
 
         while not newClient.done:
             print(f"sending {newClient.index + 1}")

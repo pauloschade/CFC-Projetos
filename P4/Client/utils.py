@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-def crc16(data: bytes):
+def crc16(data):
     '''
     CRC-16-ModBus Algorithm
     '''
@@ -50,7 +50,7 @@ def make_packages(buffer, tipo):
     total_size = len(payloads)
     for i in range(total_size):
         # tipos.append(3)
-        print(hex(crc16(payloads[i])))
+        print(crc16(payloads[i]))
         lista_head = [tipo, 10, 11, total_size, i+1, payload_sizes[i], 0,0,0,0]
         heads.append(make_head(lista_head))
     packages = []
@@ -64,8 +64,3 @@ def make_start_package(size, type_):
     head = make_head(lista_head)
     package = head + b'' + b'\xFF\xAA\xFF\xAA'
     return package
-
-
-
-
-print(crc16(b'\x31\x32\x33\x34\x35\x36\x37\x38\x39'))
