@@ -48,6 +48,7 @@ def main():
         while not newServer.done:
             print(f"receiving {newServer.index} out of {newServer.rx_size}")
             newServer.read_package()
+            time.sleep(0.05)
         bytes_to_img(newServer.rx_buffer)
 
 

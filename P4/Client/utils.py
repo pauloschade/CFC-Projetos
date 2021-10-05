@@ -1,4 +1,23 @@
 import math
+import numpy as np
+
+def crc16(data):
+    '''
+    CRC-16-ModBus Algorithm
+    '''
+    data = bytearray(data)
+    poly = 0xA001
+    crc = 0xFFFF
+    for b in data:
+        crc ^= (0xFF & b)
+        for _ in range(0, 8):
+            if (crc & 0x0001):
+                crc = ((crc >> 1) & 0xFFFF) ^ poly
+            else:
+                crc = ((crc >> 1) & 0xFFFF)
+
+    return crc & 0xFFFF
+
 def make_head(lista):
     head = b''
     for i in lista:
@@ -31,6 +50,7 @@ def make_packages(buffer, tipo):
     total_size = len(payloads)
     for i in range(total_size):
         # tipos.append(3)
+        print(crc16(payloads[i]))
         lista_head = [tipo, 10, 11, total_size, i+1, payload_sizes[i], 0,0,0,0]
         heads.append(make_head(lista_head))
     packages = []
@@ -44,13 +64,3 @@ def make_start_package(size, type_):
     head = make_head(lista_head)
     package = head + b'' + b'\xFF\xAA\xFF\xAA'
     return package
-
-
-
-
-
-
-
-
-
-

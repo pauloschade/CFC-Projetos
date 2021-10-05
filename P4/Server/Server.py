@@ -1,5 +1,6 @@
 import utils
 import time
+import datetime
 class Server():
     def __init__(self, com1):
         self.id = 11
@@ -15,6 +16,19 @@ class Server():
         self.index = 0
         self.rx = b''
         self.timeout = False
+        self.transmission=1
+        self.sending_type=1
+        self.timer2 = 0
+        self.handshake=True
+
+
+    def count_timer2(self):
+        if self.timer2 > 2:
+            self.sending_type=5
+            self.send_package(5)
+            print("Client is inactive, ending com")
+            self.done = True
+        self.timer2 += 1
 
     def send_error(self):
         self.send_package(6)
@@ -22,8 +36,10 @@ class Server():
     def check_number(self, n):
         if self.package_number != n:
             print("Wrong Package")
+            self.transmission=2
+            self.sending_type=6
             self.send_error()
-            time.sleep(1)
+            time.sleep(2)
 
 
     def set_timeout(self):
@@ -31,7 +47,7 @@ class Server():
         self.com1.rx.clearBuffer()
         print("server None")
         print(f"waiting for package{self.index}")
-        time.sleep(3)
+        time.sleep(2)
 
 
 
@@ -39,8 +55,10 @@ class Server():
         self.package =  utils.make_package(tipo, self.index)
 
     def send_package(self, tipo):
+        self.sending_type = tipo
         self.set_package(tipo)
         self.com1.sendData(self.package)
+        self.log("envio")
 
     def read_head(self):
         for i in range(10):
@@ -48,21 +66,17 @@ class Server():
 
             if rx == None:
                 self.set_timeout()
+                self.count_timer2()
                 break
 
             else:
+                self.handshake = False
+                self.transmission=1
                 self.timeout = False
                 rx_int = int.from_bytes(rx, byteorder='big')
 
                 if i == 0:
                     self.type = rx_int
-
-                if i == 2:
-                    if rx_int == self.id:
-                        self.ocioso = True
-                    else:
-                        self.ocioso = False
-                        self.send_error()
                 
                 if i == 3 and self.type == 1:
                     self.rx_size = rx_int
@@ -79,14 +93,18 @@ class Server():
         rx, n = self.com1.getData(4)
         if rx != b'\xFF\xAA\xFF\xAA':
             print("EOC not valid")
+            self.transmission=2
+            self.sending_type = 6
             time.sleep(1)
             self.com1.rx.clearBuffer()
             self.send_error()
             
         elif self.type == 1:
+            self.log("recebeu")
             self.send_package(2)
             self.index += 1
         else:
+            self.log("recebeu")
             self.send_package(4)
             self.index += 1
             self.rx_buffer += self.rx
@@ -94,13 +112,27 @@ class Server():
 
     def read_package(self):
         self.read_head()
-        assert self.ocioso, "not ready to receive"
-        if not self.timeout:
-            self.check_number(self.index)
-            self.rx, n = self.com1.getData(self.payload_size)
-            self.read_eoc()
-            self.com1.rx.clearBuffer()
-            if self.index == self.rx_size + 1:
-                self.done = True
-        else:
+        if self.handshake:
+            self.send_package(2)
             pass
+        else:
+            if not self.timeout:
+                self.check_number(self.index)
+                self.sending_type = self.type
+                self.rx, n = self.com1.getData(self.payload_size)
+                self.read_eoc()
+                self.com1.rx.clearBuffer()
+                if self.index == self.rx_size + 1:
+                    self.done = True
+                
+            else:
+                pass
+
+    def log(self, envio):
+        time=datetime.datetime.now()
+        s = [time,envio, self.sending_type, 14]
+        with open(f"Server{5}.txt", "a") as f:
+            for i in s:
+                f.write(str(i) + " / ")
+            f.write("\n")
+
