@@ -13,7 +13,7 @@ class Client():
         self.done = False
         self.sending_type = 1
         self.type = 0
-        self.error = False
+        self.error = True
         self.timer2 = 0
         self.timeout = False
         self.transmission = 1
@@ -120,11 +120,13 @@ class Client():
 
         time=datetime.datetime.now()
 
+        int_crc = int.from_bytes((self.packages[self.index][8]).to_bytes(1, byteorder="big") + (self.packages[self.index][9]).to_bytes(1, byteorder="big"), byteorder='big')
+
         if self.sending_type == 3:
-            s = [time,envio, self.sending_type, len(self.packages[self.index]), self.index + 1, self.total_packages]
+            s = [time,envio, self.sending_type, len(self.packages[self.index]), self.index + 1, self.total_packages, int_crc]
         else:
             s = [time,envio, self.sending_type, 14]
-        with open(f"Client{4}.txt", "a") as f:
+        with open(f"Client{5}.txt", "a") as f:
             for i in s:
                 f.write(str(i) + " / ")
             f.write("\n")

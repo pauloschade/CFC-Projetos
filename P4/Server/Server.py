@@ -20,6 +20,16 @@ class Server():
         self.sending_type=1
         self.timer2 = 0
         self.handshake=True
+        self.crc = None
+    
+    def check_crc(self):
+        if self.type == 3 and self.rx is not None:
+            crc_rx = utils.crc16(self.rx)
+            if crc_rx != self.crc:
+                print("invalid CRC")
+                time.sleep(0.05)
+                self.send_error()
+
 
 
     def count_timer2(self):
@@ -86,13 +96,19 @@ class Server():
 
                 if i == 5:
                     self.payload_size = rx_int
+
+                if i == 8:
+                    self.crc = rx
                 if i == 9:
-                    return "success"
+                    self.crc += rx
+                    self.crc = int.from_bytes(self.crc, byteorder='big')
 
     def read_eoc(self):
+        time.sleep(0.005)
         rx, n = self.com1.getData(4)
         if rx != b'\xFF\xAA\xFF\xAA':
             print("EOC not valid")
+            print(rx)
             self.transmission=2
             self.sending_type = 6
             time.sleep(1)
@@ -121,6 +137,8 @@ class Server():
                     self.check_number(self.index)
                     self.sending_type = self.type
                     self.rx, n = self.com1.getData(self.payload_size)
+                    time.sleep(0.01)
+                    self.check_crc()
                     self.read_eoc()
                     self.com1.rx.clearBuffer()
                     if self.index == self.rx_size + 1:
@@ -131,8 +149,11 @@ class Server():
 
     def log(self, envio):
         time=datetime.datetime.now()
-        s = [time,envio, self.sending_type, 14]
-        with open(f"Server{4}.txt", "a") as f:
+        if envio == "recebeu":
+            s = [time,envio, self.sending_type, 14, self.crc]
+        else:
+            s = [time,envio, self.sending_type, 14]
+        with open(f"Server{5}.txt", "a") as f:
             for i in s:
                 f.write(str(i) + " / ")
             f.write("\n")
