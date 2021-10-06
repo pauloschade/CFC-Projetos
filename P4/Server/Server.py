@@ -23,7 +23,7 @@ class Server():
 
 
     def count_timer2(self):
-        if self.timer2 > 2:
+        if self.timer2 > 3:
             self.sending_type=5
             self.send_package(5)
             print("Client is inactive, ending com")
@@ -112,26 +112,27 @@ class Server():
 
     def read_package(self):
         self.read_head()
-        if self.handshake:
-            self.send_package(2)
-            pass
-        else:
-            if not self.timeout:
-                self.check_number(self.index)
-                self.sending_type = self.type
-                self.rx, n = self.com1.getData(self.payload_size)
-                self.read_eoc()
-                self.com1.rx.clearBuffer()
-                if self.index == self.rx_size + 1:
-                    self.done = True
-                
-            else:
+        if not self.done:
+            if self.handshake:
+                self.send_package(2)
                 pass
+            else:
+                if not self.timeout:
+                    self.check_number(self.index)
+                    self.sending_type = self.type
+                    self.rx, n = self.com1.getData(self.payload_size)
+                    self.read_eoc()
+                    self.com1.rx.clearBuffer()
+                    if self.index == self.rx_size + 1:
+                        self.done = True
+                    
+                else:
+                    pass
 
     def log(self, envio):
         time=datetime.datetime.now()
         s = [time,envio, self.sending_type, 14]
-        with open(f"Server{5}.txt", "a") as f:
+        with open(f"Server{4}.txt", "a") as f:
             for i in s:
                 f.write(str(i) + " / ")
             f.write("\n")

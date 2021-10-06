@@ -20,7 +20,7 @@ class Client():
         self.handshake = True
 
     def count_timer2(self):
-        if self.timer2 > 2:
+        if self.timer2 > 1.9:
             print("Server is inactive, ending com")
             self.sending_type = 5
             self.log("envio")
@@ -31,7 +31,7 @@ class Client():
     def set_timeout(self):
         self.com1.rx.clearBuffer()
         print(f"resending package{self.index + 1}")
-        time.sleep(2)
+        time.sleep(1)
         self.send_packages()
 
     def set_start(self):
@@ -46,7 +46,7 @@ class Client():
         self.sending_type = 1
         self.com1.sendData(self.start_package)
         self.log("envio")
-        time.sleep(1)
+        time.sleep(0.2)
 
     def send_packages(self):
         self.sending_type = 3
@@ -124,7 +124,7 @@ class Client():
             s = [time,envio, self.sending_type, len(self.packages[self.index]), self.index + 1, self.total_packages]
         else:
             s = [time,envio, self.sending_type, 14]
-        with open(f"Client{5}.txt", "a") as f:
+        with open(f"Client{4}.txt", "a") as f:
             for i in s:
                 f.write(str(i) + " / ")
             f.write("\n")
