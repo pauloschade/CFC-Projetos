@@ -1,28 +1,38 @@
 import math
 import numpy as np
 
-def crc16(data):
+def crc16(data: bytes, poly=0x8408):
     '''
-    CRC-16-ModBus Algorithm
+    CRC-16-CCITT Algorithm
     '''
     data = bytearray(data)
-    poly = 0xA001
     crc = 0xFFFF
     for b in data:
-        crc ^= (0xFF & b)
+        cur_byte = 0xFF & b
         for _ in range(0, 8):
-            if (crc & 0x0001):
-                crc = ((crc >> 1) & 0xFFFF) ^ poly
+            if (crc & 0x0001) ^ (cur_byte & 0x0001):
+                crc = (crc >> 1) ^ poly
             else:
-                crc = ((crc >> 1) & 0xFFFF)
-
+                crc >>= 1
+            cur_byte >>= 1
+    crc = (~crc & 0xFFFF)
+    crc = (crc << 8) | ((crc >> 8) & 0xFF)
+    
     return crc & 0xFFFF
 
-def make_head(lista):
+def make_head(lista, payload):
     head = b''
     for i in lista:
         bytes_i = (i).to_bytes(1, byteorder='big')
         head += bytes_i
+
+    if payload is not None:
+        crc_ = crc16(payload).to_bytes(2, byteorder="big")
+    else:
+        crc_= (0).to_bytes(2, byteorder="big")
+
+    head += crc_
+    
     return head
 
 def make_payload(buffer):
@@ -50,9 +60,8 @@ def make_packages(buffer, tipo):
     total_size = len(payloads)
     for i in range(total_size):
         # tipos.append(3)
-        print(crc16(payloads[i]))
-        lista_head = [tipo, 10, 11, total_size, i+1, payload_sizes[i], 0,0,0,0]
-        heads.append(make_head(lista_head))
+        lista_head = [tipo, 10, 11, total_size, i+1, payload_sizes[i], 0,0]
+        heads.append(make_head(lista_head, payloads[i]))
     packages = []
     for i in range(total_size):
         package = heads[i] + payloads[i]
@@ -60,7 +69,7 @@ def make_packages(buffer, tipo):
     return packages
 
 def make_start_package(size, type_):
-    lista_head = [type_, 10, 11, size, 0, 0, 0,0,0,0]
-    head = make_head(lista_head)
+    lista_head = [type_, 10, 11, size, 0, 0, 0,0]
+    head = make_head(lista_head, None )
     package = head + b'' + b'\xFF\xAA\xFF\xAA'
     return package
