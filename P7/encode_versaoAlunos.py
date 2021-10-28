@@ -1,7 +1,13 @@
 
 
 #importe as bibliotecas
-
+import matplotlib.pyplot as plt
+import time
+import numpy as np
+import sounddevice as sd
+from scipy import signal
+from scipy.fftpack import fft, fftshift
+import sys
 
 
 
@@ -19,7 +25,7 @@ def main():
     
      #declare um objeto da classe da sua biblioteca de apoio (cedida)    
     #declare uma variavel com a frequencia de amostragem, sendo 44100
-    
+    f=44100
     #voce importou a bilioteca sounddevice como, por exemplo, sd. entao
     # os seguintes parametros devem ser setados:
     
@@ -35,6 +41,13 @@ def main():
     
     #gere duas senoides para cada frequencia da tabela DTMF ! Canal x e canal y 
     #use para isso sua biblioteca (cedida)
+    def generateSin(freq, time, fs):
+        n = time*fs #numero de pontos
+        x = np.linspace(0.0, time, n)  # eixo do tempo
+        s = np.sin(freq*x*2*np.pi)
+        plt.figure()
+        plt.plot(x,s)
+        return (x, s)
     #obtenha o vetor tempo tb.
     #deixe tudo como array
 

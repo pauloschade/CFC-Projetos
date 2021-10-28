@@ -2,8 +2,12 @@
 """Show a text-mode spectrogram using live microphone data."""
 
 #Importe todas as bibliotecas
-
-
+import time
+import numpy as np
+import sounddevice as sd
+from scipy import signal
+from scipy.fftpack import fft, fftshift
+from suaBibSignal import signalMeu
 #funcao para transformas intensidade acustica em dB
 def todB(s):
     sdB = 10*np.log10(s)
@@ -14,6 +18,12 @@ def main():
  
     #declare um objeto da classe da sua biblioteca de apoio (cedida)    
     #declare uma variavel com a frequencia de amostragem, sendo 44100
+
+    new_signal = signalMeu()
+
+
+
+    fs=44100
     
     #voce importou a bilioteca sounddevice como, por exemplo, sd. entao
     # os seguintes parametros devem ser setados:
@@ -25,10 +35,17 @@ def main():
 
     # faca um printo na tela dizendo que a captacao comecará em n segundos. e entao 
     #use um time.sleep para a espera
+
+    time.sleep(1)
+
    
    #faca um print informando que a gravacao foi inicializada
+
+    print("Gravação inicializada")
    
    #declare uma variavel "duracao" com a duracao em segundos da gravacao. poucos segundos ... 
+
+    duracao=2
    #calcule o numero de amostras "numAmostras" que serao feitas (numero de aquisicoes)
    
     audio = sd.rec(int(numAmostras), freqDeAmostragem, channels=1)
