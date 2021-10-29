@@ -5,9 +5,12 @@
 import time
 import numpy as np
 import sounddevice as sd
-from scipy import signal
 from scipy.fftpack import fft, fftshift
 from suaBibSignal import signalMeu
+import matplotlib.pyplot as plt
+import scipy.io.wavfile as wav
+import soundfile   as sf
+
 #funcao para transformas intensidade acustica em dB
 def todB(s):
     sdB = 10*np.log10(s)
@@ -15,22 +18,19 @@ def todB(s):
 
 
 def main():
+
+    new_signal = signalMeu()
  
     #declare um objeto da classe da sua biblioteca de apoio (cedida)    
     #declare uma variavel com a frequencia de amostragem, sendo 44100
-
-    new_signal = signalMeu()
-
-
-
     fs=44100
     
     #voce importou a bilioteca sounddevice como, por exemplo, sd. entao
     # os seguintes parametros devem ser setados:
     
-    sd.default.samplerate = #taxa de amostragem
-    sd.default.channels = 2  #voce pode ter que alterar isso dependendo da sua placa
-    duration = #tempo em segundos que ira aquisitar o sinal acustico captado pelo mic
+    sd.default.samplerate = fs
+    sd.default.channels = 1  #voce pode ter que alterar isso dependendo da sua placa
+    duration = 4
 
 
     # faca um printo na tela dizendo que a captacao comecará em n segundos. e entao 
@@ -41,33 +41,47 @@ def main():
    
    #faca um print informando que a gravacao foi inicializada
 
-    print("Gravação inicializada")
+
+
+    numAmostras = duration * fs
    
    #declare uma variavel "duracao" com a duracao em segundos da gravacao. poucos segundos ... 
-
-    duracao=2
    #calcule o numero de amostras "numAmostras" que serao feitas (numero de aquisicoes)
    
-    audio = sd.rec(int(numAmostras), freqDeAmostragem, channels=1)
+    for i in range(3):
+        print("Recording in {}...".format(3-i))
+        time.sleep(1)
+
+    print("Recording...")
+
+    recording = sd.rec(int(numAmostras), fs, 1, blocking='True')
     sd.wait()
-    print("...     FIM")
+
+    print("Audio recorded")
+
+    wav.write("./audio.wav", fs, recording)
+
+    audio, samplerate = sf.read('audio.wav')
+    yAudio = audio
+    samplesAudio = len(yAudio)
+    sd.play(audio)
+    sd.wait()
     
     #analise sua variavel "audio". pode ser um vetor com 1 ou 2 colunas, lista ...
     #grave uma variavel com apenas a parte que interessa (dados)
     
 
     # use a funcao linspace e crie o vetor tempo. Um instante correspondente a cada amostra!
-    t = np.linspace(inicio,fim,numPontos)
+    t=np.linspace(-duration/2, duration/2, duration*fs)
 
     # plot do gravico  áudio vs tempo!
+    plt.plot(t, yAudio)
+    plt.grid()
+    plt.title('Audio x tempo')
    
     
     ## Calcula e exibe o Fourier do sinal audio. como saida tem-se a amplitude e as frequencias
-    xf, yf = signal.calcFFT(y, fs)
-    plt.figure("F(y)")
-    plt.plot(xf,yf)
-    plt.grid()
-    plt.title('Fourier audio')
+    X,Y = new_signal.plotFFT(yAudio, samplerate)
     
 
     #esta funcao analisa o fourier e encontra os picos
@@ -75,7 +89,11 @@ def main():
     #voce deve tambem evitar que dois picos proximos sejam identificados, pois pequenas variacoes na
     #frequencia do sinal podem gerar mais de um pico, e na verdade tempos apenas 1.
    
-    index = peakutils.indexes(,,)
+    import peakutils
+    index = peakutils.indexes(np.abs(Y), thres=0.31, min_dist=20)
+    print("index de picos {}" .format(index))
+    for freq in X[index]:
+        print("freq de pico sao {}" .format(freq))
     
     #printe os picos encontrados! 
     
@@ -85,6 +103,7 @@ def main():
   
     ## Exibe gráficos
     plt.show()
+    
 
 if __name__ == "__main__":
     main()
